@@ -1,16 +1,8 @@
-
 #include "stdafx.h"
 #include <iostream>
 #include <windows.h>
 
-using namespace std;
-
-/*
-Data Structures Pre-Visa Project - Maze Solver
-Alperen Coþkun
-*/
-
-void SetColor(int ForgC) {
+void setColor(int ForgC) {
 	WORD wColor;
 
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -28,16 +20,18 @@ void gotoXY(int x, int y) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), p);
 }
 
-const int mazeHeight = 15;
-const int mazeWidth = 15;
+const int HEIGHT = 15;
+const int WIDTH = 15;
 
-const bool maze[mazeHeight][mazeWidth] =
+//0's are walls , 1's are paths
+
+const bool MAZE[HEIGHT][WIDTH] =
 {
 	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,
 	0,0,1,1,1,0,1,0,0,1,1,1,1,0,0,
 	0,0,0,1,0,0,1,1,0,1,0,0,0,0,0,
-	0,1,1,1,0,1,1,0,0,1,0,1,1,1,0,          //Random maze. It should work with any maze
+	0,1,1,1,0,1,1,0,0,1,0,1,1,1,0,          
 	0,1,0,0,1,0,1,1,0,1,0,1,0,1,0,
 	0,1,0,0,1,1,0,1,0,1,0,1,1,1,0,
 	0,1,0,1,1,0,0,1,0,1,1,1,0,0,0,
@@ -50,16 +44,16 @@ const bool maze[mazeHeight][mazeWidth] =
 	0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
 };
 
-bool burda[mazeHeight][mazeWidth];
+bool isHere[HEIGHT][WIDTH];
 
 bool canMoveRight = false;
 bool canMoveLeft = false;
 bool canMoveUp = false;
 bool canMoveDown = false;
 
-short facing = 1;// 1=right 2=left 3=up 4=down
+short facing = 1; // 1=right 2=left 3=up 4=down
 
-short wherex() {
+int whereX() {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(
 		GetStdHandle(STD_OUTPUT_HANDLE),
@@ -69,7 +63,7 @@ short wherex() {
 	return csbi.dwCursorPosition.X;
 }
 
-short wherey() {
+int whereY() {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(
 		GetStdHandle(STD_OUTPUT_HANDLE),
@@ -81,7 +75,7 @@ short wherey() {
 
 void moveIn(int x, int y) {
 
-	Sleep(45);
+	Sleep(40);
 
 	if (y == 0 && x == 0)
 	{
@@ -92,85 +86,109 @@ void moveIn(int x, int y) {
 
 		//Checking edges
 
-		if (maze[wherey() - 1][((wherex() - 1) / 2) + 1]) { canMoveRight = true; }
-		if (maze[wherey() - 1][((wherex() - 1) / 2) - 1]) { canMoveLeft = true; }
-		if (maze[(wherey() - 1) - 1][(wherex() - 1) / 2]) { canMoveUp = true; }
-		if (maze[(wherey() - 1) + 1][(wherex() - 1) / 2]) { canMoveDown = true; }
+		if (MAZE[whereY() - 1][((whereX() - 1) / 2) + 1]) {
+			canMoveRight = true;
+		}
+		if (MAZE[whereY() - 1][((whereX() - 1) / 2) - 1]) {
+			canMoveLeft = true; 
+		}
+		if (MAZE[(whereY() - 1) - 1][(whereX() - 1) / 2]) {
+			canMoveUp = true;
+		}
+		if (MAZE[(whereY() - 1) + 1][(whereX() - 1) / 2]) {
+			canMoveDown = true; 
+		}
 	}
 	else {
-		SetColor(34);
+		setColor(34);
 		printf("1");
-		burda[wherey() - 1][(wherex() - 1) / 2] = false;
+		isHere[whereY() - 1][(whereX() - 1) / 2] = false;
 	}
 	if (y == 1 || y == -1) {
-		gotoXY(wherex() - 1, wherey() + y);
-		SetColor(44);
+		gotoXY(whereX() - 1, whereY() + y);
+		setColor(44);
 		printf("1");
-		gotoXY(wherex() - 1, wherey());
-		burda[(wherey() - 1)][(wherex() - 1) / 2] = true;
+		gotoXY(whereX() - 1, whereY());
+		isHere[(whereY() - 1)][(whereX() - 1) / 2] = true;
 	}
 	if (x == 1) {
-		gotoXY(wherex() + x, wherey() + y);
-		SetColor(44);
+		gotoXY(whereX() + x, whereY() + y);
+		setColor(44);
 		printf("1");
-		gotoXY(wherex() - 1, wherey());
-		burda[wherey() - 1][((wherex() - 1) / 2)] = true;
+		gotoXY(whereX() - 1, whereY());
+		isHere[whereY() - 1][((whereX() - 1) / 2)] = true;
 	}
 	if (x == -1) {
-		gotoXY(wherex() - 3, wherey() + y);
-		SetColor(44);
+		gotoXY(whereX() - 3, whereY() + y);
+		setColor(44);
 		printf("1");
-		gotoXY(wherex() - 1, wherey());
-		burda[wherey() - 1][((wherex() - 1) / 2)] = true;
+		gotoXY(whereX() - 1, whereY());
+		isHere[whereY() - 1][((whereX() - 1) / 2)] = true;
 	}
 }
 
-void runForestRun(int destinationXY) { //Solving maze with right-hand rule
-	short tempx, tempy;
+void runForestRun(int destinationXY) { //Solving MAZE with right-hand rule
+	int tempX, tempY;
 
 	gotoXY(1, 1);
 
-	while (wherey() != mazeWidth)
+	while (whereY() != WIDTH)
 	{
-		if ((wherex() - 1) / 2 == mazeHeight - 1)
+		if ((whereX() - 1) / 2 == HEIGHT - 1)
 			return;
 		moveIn(0, 0);
 
 		//sorry for too much if-else
 
-		if (facing == 1 && canMoveDown) { facing = 4; moveIn(0, 1); moveIn(0, 0); }
+		if (facing == 1 && canMoveDown) { 
+			facing = 4;
+			moveIn(0, 1);
+			moveIn(0, 0);
+		}
 		else if (facing == 1) {
 			if (!canMoveRight)facing = 2;
 			else moveIn(1, 0);
 		}
 
-		if (facing == 2 && canMoveUp) { facing = 3; moveIn(0, -1); moveIn(0, 0); }
+		if (facing == 2 && canMoveUp) {
+			facing = 3;
+			moveIn(0, -1); 
+			moveIn(0, 0);
+		}
 		else if (facing == 2) {
 			if (!canMoveLeft)facing = 1;
 			else moveIn(-1, 0);
 		}
 
-		if (facing == 3 && canMoveRight) { facing = 1; moveIn(1, 0); moveIn(0, 0); }
+		if (facing == 3 && canMoveRight) {
+			facing = 1;
+			moveIn(1, 0);
+			moveIn(0, 0);
+		}
 		else if (facing == 3) {
 			if (!canMoveUp)facing = 4;
 			else moveIn(0, -1);
 		}
 
-		if (facing == 4 && canMoveLeft) { facing = 2; moveIn(-1, 0); moveIn(0, 0); }
+		if (facing == 4 && canMoveLeft) {
+			facing = 2;
+			moveIn(-1, 0);
+			moveIn(0, 0);
+		}
 		else if (facing == 4) {
 			if (!canMoveDown)facing = 3;
 			else moveIn(0, 1);
 		}
 
-		tempx = wherex();
-		tempy = wherey();
+		tempX = whereX();
+		tempY = whereY();
 		gotoXY(20, 20);
 		printf("%s", "      ");
 		moveIn(0, 0);
 
-		for (int q = 0; q<mazeHeight; q++)
-			for (int w = 0; w<mazeWidth; w++)
-				if (burda[q][w]) {
+		for (int q = 0; q<HEIGHT; q++)
+			for (int w = 0; w<WIDTH; w++)
+				if (isHere[q][w]) {
 					gotoXY(20, 20);
 					printf("%s", "(");
 					printf("%d", w);
@@ -179,27 +197,30 @@ void runForestRun(int destinationXY) { //Solving maze with right-hand rule
 					printf("%s", ")");
 					Sleep(30);
 				}
-		gotoXY(tempx, tempy);
+		gotoXY(tempX, tempY);
 	}
 }
 
-void launchMaze() { //Print maze
-	for (int i = 0; i<mazeHeight; i++) {
+void launchMaze() { //Print MAZE
+	for (int i = 0; i<HEIGHT; i++) {
 		printf("\n");
-		for (int j = 0; j<mazeWidth; j++)
+		for (int j = 0; j<WIDTH; j++)
 		{
-			//maze[i][j]=1;
-			if (maze[i][j]) SetColor(34);
-			else SetColor(55);
-			printf("%2d", maze[i][j]);
+			//MAZE[i][j]=1;
+			if (MAZE[i][j]) setColor(34);
+			else setColor(55);
+			printf("%2d", MAZE[i][j]);
 		}
 	}
 	printf("\n");
 }
+
 int main() {
 	launchMaze();
 	runForestRun(27);
 
 	gotoXY(28, 20);
-	system("pause");
+	
+	system("pause"); 
+	return 0;
 }
