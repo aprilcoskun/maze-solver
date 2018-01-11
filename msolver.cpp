@@ -31,7 +31,7 @@ const bool MAZE[HEIGHT][WIDTH] =
 	0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,
 	0,0,1,1,1,0,1,0,0,1,1,1,1,0,0,
 	0,0,0,1,0,0,1,1,0,1,0,0,0,0,0,
-	0,1,1,1,0,1,1,0,0,1,0,1,1,1,0,          
+	0,1,1,1,0,1,1,0,0,1,0,1,1,1,0,
 	0,1,0,0,1,0,1,1,0,1,0,1,0,1,0,
 	0,1,0,0,1,1,0,1,0,1,0,1,1,1,0,
 	0,1,0,1,1,0,0,1,0,1,1,1,0,0,0,
@@ -90,13 +90,13 @@ void moveIn(int x, int y) {
 			canMoveRight = true;
 		}
 		if (MAZE[whereY() - 1][((whereX() - 1) / 2) - 1]) {
-			canMoveLeft = true; 
+			canMoveLeft = true;
 		}
 		if (MAZE[(whereY() - 1) - 1][(whereX() - 1) / 2]) {
 			canMoveUp = true;
 		}
 		if (MAZE[(whereY() - 1) + 1][(whereX() - 1) / 2]) {
-			canMoveDown = true; 
+			canMoveDown = true;
 		}
 	}
 	else {
@@ -127,20 +127,21 @@ void moveIn(int x, int y) {
 	}
 }
 
-void runForestRun(int destinationXY) { //Solving MAZE with right-hand rule
+//Solving MAZE with right-hand rule
+
+void runForestRun() {
 	int tempX, tempY;
 
 	gotoXY(1, 1);
 
-	while (whereY() != WIDTH)
-	{
+	while (whereY() != WIDTH) {
 		if ((whereX() - 1) / 2 == HEIGHT - 1)
 			return;
 		moveIn(0, 0);
 
 		//sorry for too much if-else
 
-		if (facing == 1 && canMoveDown) { 
+		if (facing == 1 && canMoveDown) {
 			facing = 4;
 			moveIn(0, 1);
 			moveIn(0, 0);
@@ -152,7 +153,7 @@ void runForestRun(int destinationXY) { //Solving MAZE with right-hand rule
 
 		if (facing == 2 && canMoveUp) {
 			facing = 3;
-			moveIn(0, -1); 
+			moveIn(0, -1);
 			moveIn(0, 0);
 		}
 		else if (facing == 2) {
@@ -206,7 +207,6 @@ void launchMaze() { //Print MAZE
 		printf("\n");
 		for (int j = 0; j<WIDTH; j++)
 		{
-			//MAZE[i][j]=1;
 			if (MAZE[i][j]) setColor(34);
 			else setColor(55);
 			printf("%2d", MAZE[i][j]);
@@ -217,10 +217,10 @@ void launchMaze() { //Print MAZE
 
 int main() {
 	launchMaze();
-	runForestRun(27);
+	runForestRun();
 
 	gotoXY(28, 20);
-	
-	system("pause"); 
+
+	system("pause");
 	return 0;
 }
